@@ -1,0 +1,11 @@
+# Generative Agents course — Python dependencies
+# Install with: pip install -r requirements.txt
+
+# Load environment variables from .env (no API keys in code)
+python-dotenv>=1.0.0
+
+# OpenAI API client for LLM completions
+openai>=1.0.0
+
+# For running tests
+pytest>=7.0.0

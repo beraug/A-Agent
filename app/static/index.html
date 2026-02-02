@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Agentic AI Playground</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+    }
+    #chat {
+      border: 1px solid #ccc;
+      padding: 10px;
+      height: 400px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .user {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .agent {
+      margin-left: 10px;
+    }
+    input {
+      width: 80%;
+      padding: 8px;
+    }
+    button {
+      padding: 8px 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Agentic AI Playground</h2>
+
+  <div id="chat"></div>
+
+  <input id="message" type="text" placeholder="Type a message..." />
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    const chatDiv = document.getElementById("chat");
+    const input = document.getElementById("message");
+
+    function addMessage(role, text) {
+      const div = document.createElement("div");
+      div.className = role;
+      div.textContent = `${role === "user" ? "You" : "Agent"}: ${text}`;
+      chatDiv.appendChild(div);
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const message = input.value.trim();
+      if (!message) return;
+
+      addMessage("user", message);
+      input.value = "";
+
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message })
+        });
+
+        if (!response.ok) {
+          throw new Error("Server error");
+        }
+
+        const data = await response.json();
+        addMessage("agent", data.reply);
+
+      } catch (err) {
+        addMessage("agent", "Error: agent unavailable (is the server running?)");
+      }
+    }
+
+    // Allow Enter key to send
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        sendMessage();
+      }
+    });
+  </script>
+
+</body>
+</html>
+
