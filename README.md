@@ -92,13 +92,6 @@ From the repository root:
 
 pip install -r requirements.txt
 
-## Install OS dependencies
-
-sudo apt-get install pytest
-sudo apt-get install fastapi
-sudo apt-get install uvicorn
-sudo apt-get install tesseract-ocr
-
 ## Install Ollama (Local LLM Runtime)
 Ollama runs the language model locally and exposes it over HTTP.
 
