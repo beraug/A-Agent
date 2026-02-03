@@ -18,3 +18,4 @@ pillow
 pytesseract
 pymupdf
 python-docx
+python-multipart-0.0.22

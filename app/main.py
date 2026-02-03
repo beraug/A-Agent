@@ -18,10 +18,11 @@ _SRC = _ROOT / "src"
 if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
-from agent import agent_chat, get_memory_stream  # noqa: E402
+from agent import agent_chat, get_memory_stream, reset_memory_stream, reply_with_ephemeral_context  # noqa: E402
 from llm import DEFAULT_MODEL, bootstrap_ollama  # noqa: E402
 from ingest import extract_text_from_upload  # noqa: E402
 
+MEMORY_DB_PATH = Path(os.environ.get("MEMORY_DB_PATH", "data/memory.db"))
 
 app = FastAPI()
 
@@ -57,6 +58,39 @@ def _startup() -> None:
 def health() -> dict:
     return {"ollama": "ok", "model": DEFAULT_MODEL}
 
+@app.post("/memory/clear")
+def clear_memory() -> dict:
+    """
+    Hard reset: close DB, delete SQLite files (db/wal/shm), recreate empty DB.
+    """
+    try:
+        stream = get_memory_stream()
+        db_path = Path(stream.db_path)
+
+        # Close current connection first
+        try:
+            stream.close()
+        except Exception:
+            pass
+
+        # Delete db + WAL sidecars
+        for p in [
+            db_path,
+            Path(str(db_path) + "-wal"),
+            Path(str(db_path) + "-shm"),
+        ]:
+            try:
+                if p.exists():
+                    p.unlink()
+            except Exception:
+                pass
+
+        # Recreate empty DB (schema created in MemoryStream.__init__)
+        reset_memory_stream(db_path=str(db_path))
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/chat", response_model=ChatOut)
 def chat(body: ChatIn) -> ChatOut:
@@ -91,7 +125,7 @@ async def chat_file(
     used_bytes = 0
     used_chars = 0
     extracted_parts: list[str] = []
-    file_summaries: list[str] = []
+    tagged_notes: list[tuple[str, str]] = []  # (type, content)
 
     for f in files:
         name = f.filename or "upload"
@@ -99,7 +133,7 @@ async def chat_file(
 
         raw = await f.read()
         if not raw:
-            file_summaries.append(f"{name} ({ctype or 'unknown'}) bytes=0")
+            tagged_notes.append(("upload", f"User uploaded empty file: {name} ({ctype or 'unknown'})"))
             continue
 
         # Enforce total upload bytes cap
@@ -107,7 +141,16 @@ async def chat_file(
         raw = raw[:remaining_bytes]
         used_bytes += len(raw)
 
-        file_summaries.append(f"{name} ({ctype or 'unknown'}) bytes={len(raw)}")
+        # Tag per file type for later filtered retrieval.
+        # NOTE: We store ONLY lightweight notes here, not full extracted text (avoids memory bloat).
+        if ctype.startswith("image/") or name.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+            tagged_notes.append(("image_ocr", f"User uploaded image for OCR: {name} ({ctype}) bytes={len(raw)}"))
+        elif ctype == "application/pdf" or name.lower().endswith(".pdf"):
+            tagged_notes.append(("document", f"User uploaded PDF: {name} bytes={len(raw)}"))
+        elif name.lower().endswith(".docx") or "wordprocessingml.document" in ctype:
+            tagged_notes.append(("document", f"User uploaded DOCX: {name} bytes={len(raw)}"))
+        else:
+            tagged_notes.append(("upload", f"User uploaded file: {name} ({ctype or 'unknown'}) bytes={len(raw)}"))
 
         if used_bytes >= total_upload_bytes_cap:
             extracted_parts.append("[Note: uploads truncated due to TOTAL_UPLOAD_BYTES limit]")
@@ -131,19 +174,18 @@ async def chat_file(
             used_chars += len(text)
             extracted_parts.append(f"[Extracted: {name}]\n{text}\n")
 
-    context = "\n".join(extracted_parts).strip()
-    combined = message
-    if context:
-        combined = (
-            "User provided uploaded files. Use their extracted text as authoritative context.\n\n"
-            f"FILES:\n{context}\n\n"
-            f"USER MESSAGE:\n{message}"
-        )
+    extra_context = "\n".join(extracted_parts).strip()
+
 
     # Optionally: store a lightweight note in memory via agent_chat loop (keeps architecture frozen).
     # We only pass it as part of the message; agent loop already stores observations.
     try:
-        reply = agent_chat(combined)
+        stream = get_memory_stream()
+        reply = reply_with_ephemeral_context(
+            stream,
+            message,
+            extra_context=extra_context,
+        )
     except Exception as e:
         raise HTTPException(status_code=503, detail=str(e))
 
@@ -155,4 +197,3 @@ def history(n: int = 50) -> list[dict]:
     n = max(0, min(500, n))
     stream = get_memory_stream()
     return stream.get_recent(k=n)
-

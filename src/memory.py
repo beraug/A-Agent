@@ -14,9 +14,6 @@ Usage:
     recent = stream.retrieve("hello", k=5)
 """
 
-import uuid
-from datetime import datetime, timezone
-from typing import Any
 import os
 import sqlite3
 import uuid
@@ -82,6 +79,13 @@ class MemoryStream:
         )
         self._conn.commit()
 
+    def close(self) -> None:
+        """Close the underlying SQLite connection."""
+        try:
+            self._conn.close()
+        except Exception:
+            pass
+
     def add_observation(
         self,
         content: str,
@@ -136,12 +140,16 @@ class MemoryStream:
         out.reverse()
         return out
 
-    def retrieve(self, query: str, k: int = 5) -> list[dict[str, Any]]:
+    def retrieve(self, query: str, k: int = 5, types: list[str] | None = None) -> list[dict[str, Any]]:
         """
         Return top-k memories. Currently recency-only: last k records,
         most recent last. Query is ignored; relevance can be added later.
         """
-        return self.get_recent(k=k)
+        records = self.get_recent(k=k)
+        if types is not None:
+            records = [r for r in records if r.get("type") in types]
+
+        return records
 
     def get_all(self) -> list[dict[str, Any]]:
         """Return the full stream in order (oldest first)."""
@@ -170,6 +178,3 @@ class MemoryStream:
                 break
             n += 1
         return n
-
-    def close(self) -> None:
-        self._conn.close()

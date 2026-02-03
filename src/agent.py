@@ -15,6 +15,7 @@ Usage:
 from typing import TYPE_CHECKING, Callable
 
 from llm import OllamaError, complete
+from llm import complete as complete_default
 
 from reflection import run_reflection, should_reflect
 
@@ -27,6 +28,22 @@ _STREAM = MemoryStream()
 
 
 def get_memory_stream() -> MemoryStream:
+    return _STREAM
+
+def reset_memory_stream(db_path: str | None = None) -> MemoryStream:
+    """
+    Close and recreate the global memory stream (used for /memory/clear).
+    If db_path is None, keep the existing stream's path.
+    """
+    global _STREAM
+    old = _STREAM
+    try:
+        old_path = getattr(old, "db_path", None)
+        old.close()
+    except Exception:
+        old_path = None
+
+    _STREAM = MemoryStream(db_path=db_path or old_path)
     return _STREAM
 
 
@@ -59,7 +76,6 @@ def _format_context(records: list[dict]) -> str:
         kind = r.get("type", "observation")
         lines.append(f"- [{kind}] {content}")
     return "\n".join(lines) if lines else "(No prior context.)"
-
 
 def reply(
     memory_stream: "MemoryStream",
@@ -113,6 +129,53 @@ def reply(
 
     return reply_text
 
+def reply_with_ephemeral_context(
+    memory_stream: "MemoryStream",
+    user_message: str,
+    extra_context: str | None = None,
+    retrieve_k: int = 10,
+    reflect_every_n: int = 8,
+    complete_fn: Callable[[str, str | None], str] = complete,
+) -> str:
+    """
+    Like reply(), but extra_context is used ONLY for this turn's prompt.
+    extra_context is NOT stored in memory.
+    """
+    user_message = user_message.strip()
+    if not user_message and not (extra_context or "").strip():
+        return ""
+
+    # Store only the user's plain message (no file content)
+    if user_message:
+        memory_stream.add_observation(f"User said: {user_message}")
+    else:
+        memory_stream.add_observation("User provided files without a text message.")
+
+    # Optionally reflect (based on count since last reflection)
+    if should_reflect(memory_stream, every_n=reflect_every_n):
+        run_reflection(memory_stream, last_k=retrieve_k, complete_fn=complete_fn)
+
+    # Retrieve memories based on the plain user message (no file content)
+    context_records = memory_stream.retrieve(user_message, k=retrieve_k)
+    context_text = _format_context(context_records)
+
+    # Build prompt: include ephemeral extra_context only for this turn
+    extra = (extra_context or "").strip()
+    if extra:
+        prompt = (
+            "You may use the following ephemeral user-provided context for THIS TURN ONLY.\n"
+            "Do not assume it persists unless repeated later.\n\n"
+            f"EPHEMERAL CONTEXT:\n{extra}\n\n"
+            + PROMPT_TEMPLATE.format(context=context_text, message=user_message)
+        )
+    else:
+        prompt = PROMPT_TEMPLATE.format(context=context_text, message=user_message)
+
+    response = complete_fn(prompt, system=AGENT_SYSTEM)
+
+    # Store agent reply as usual
+    memory_stream.add_observation(f"Agent replied: {response}")
+    return response
 
 def main() -> None:
     """Demo: one turn with Ollama (or mock). Run from project root: python src/agent.py."""

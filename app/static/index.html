@@ -267,20 +267,7 @@
       font-size:13px;
       color:var(--text);
     }
-    .filemeta{color:var(--muted); font-size:12px}
-    .thumb{
-      width:100%;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.12);
-      overflow:hidden;
-      background: rgba(0,0,0,.20);
-      display:none;
-    }
-    .thumb img{
-      width:100%;
-      height:auto;
-      display:block;
-    }
+    .filemeta{color:var(--muted); font-size:12px}    
     .toggle{
       display:flex;
       gap:8px;
@@ -334,6 +321,7 @@
         </div>
         <div class="btnrow">
           <button class="ghost" id="btnHistory" title="Fetch recent memory records">Load History</button>
+          <button class="ghost danger" id="btnClearMemory">Clear Memory</button>
           <button class="ghost danger" id="btnClear" title="Clear the chat UI (does not delete memory)">Clear UI</button>
           <button class="primary" id="btnSend">Send</button>
         </div>
@@ -374,10 +362,6 @@
               <button id="btnRemoveFiles" class="ghost" type="button">Remove all</button>
             </div>
 
-            <div id="thumb" class="thumb" style="margin-top:10px;">
-              <img id="thumbImg" alt="preview" />
-            </div>
-
             <div id="fileList" class="filelist"></div>
           </div>
 
@@ -408,6 +392,7 @@
     const btnSend = document.getElementById("btnSend");
     const btnClear = document.getElementById("btnClear");
     const btnHistory = document.getElementById("btnHistory");
+    const btnClearMemory = document.getElementById("btnClearMemory");
     const healthDot = document.getElementById("healthDot");
     const healthText = document.getElementById("healthText");
     const includeHistory = document.getElementById("includeHistory");
@@ -416,8 +401,6 @@
     const fileInput = document.getElementById("fileInput");
     const fileList = document.getElementById("fileList");
     const btnRemoveFiles = document.getElementById("btnRemoveFiles");
-    const thumb = document.getElementById("thumb");
-    const thumbImg = document.getElementById("thumbImg");
 
     let selectedFiles = [];
 
@@ -439,8 +422,6 @@
 
     function renderFileList() {
       fileList.innerHTML = "";
-      thumb.style.display = "none";
-      thumbImg.src = "";
 
       if (selectedFiles.length === 0) {
         const empty = document.createElement("div");
@@ -450,20 +431,12 @@
         return;
       }
 
-      // show first image preview if present
-      const firstImg = selectedFiles.find(f => f.type.startsWith("image/"));
-      if (firstImg) {
-        const url = URL.createObjectURL(firstImg);
-        thumbImg.src = url;
-        thumb.style.display = "block";
-      }
-
       selectedFiles.forEach((f, idx) => {
         const row = document.createElement("div");
         row.className = "fileitem";
 
         const left = document.createElement("div");
-        left.innerHTML = `<div><b>${escapeHtml(f.name)}</b></div><div class="filemeta">${escapeHtml(f.type || "unknown")} · ${fmtBytes(f.size)}</div>`;
+        left.innerHTML = `<div><b>${escapeHtml(f.name)}</b></div><div class="filemeta">${fmtBytes(f.size)}</div>`;
 
         const right = document.createElement("button");
         right.className = "ghost";
@@ -517,6 +490,19 @@
     btnClear.addEventListener("click", () => {
       logEl.innerHTML = "";
       addMsg("sys", "UI cleared (memory not deleted).");
+    });
+
+    btnClearMemory.addEventListener("click", async () => {
+      if (!confirm("This will permanently delete the agent's memory. Continue?")) {
+        return;
+      }
+      try {
+        const res = await fetch("/memory/clear", { method: "POST" });
+        if (!res.ok) throw new Error();
+        addMsg("sys", "Agent memory cleared.");
+      } catch {
+        addMsg("sys", "Failed to clear memory.");
+      }
     });
 
     btnHistory.addEventListener("click", async () => {

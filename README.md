@@ -107,8 +107,10 @@ https://ollama.com
 Verify installation:
 ollama --version
 
-## Download a ModelRun once to download a model (example): ollama pull llama3.2
-The model is stored locally.
+## Download a ModelRun once to download a model (example): 
+
+ollama pull llama3.2 
+## >> The model is stored locally.
 
 Note: On most systems you do **not** need to run `ollama serve` explicitly.  
 Ollama starts automatically when accessed.
