@@ -55,33 +55,36 @@ User message
 ## Repository Structure
 .
 ├── app/
-│ ├── main.py # FastAPI backend
-│ └── static/
-│ └── index.html # Simple web UI
-├── src/
-│ ├── agent.py # Agent planning loop
-│ ├── memory.py # SQLite-backed memory stream
-│ ├── reflection.py # Reflection logic
-│ ├── llm.py # Ollama interface + bootstrap
-│ └── hello_agent.py # Phase 0 sanity check
+│   ├── __init__.py
+│   ├── main.py
+│   └── static/
+│       └── index.html
 ├── data/
-│ └── memory.db # SQLite database (auto-created, gitignored)
+│   └── memory.db            # auto-created at runtime (gitignored)
 ├── docs/
-│ ├── COURSE_PLAN.md
-│ ├── ARCHITECTURE_FROZEN.md
-│ └── PAPER_SUMMARY.md
+│   ├── ARCHITECTURE_FROZEN.md
+│   ├── COURSE_PLAN.md
+│   └── PAPER_SUMMARY.md
+├── src/
+│   ├── agent.py
+│   ├── hello_agent.py
+│   ├── llm.py
+│   ├── memory.py
+│   └── reflection.py
 ├── tests/
-│ ├── test_agent.py
-│ └── test_reflection.py
+│   ├── test_agent.py
+│   └── test_reflection.py
 ├── requirements.txt
 ├── README.md
+├── .gitignore
 └── LICENSE
+
 
 ## Requirements
 
 ### System
 - Python 3.10+
-- Linux, macOS, or Windows
+- Linux,Ubuntu
 - Internet required only once to download the model
 
 ### Python Dependencies
@@ -89,22 +92,22 @@ From the repository root:
 
 pip install -r requirements.txt
 
+## Install OS dependencies
+
+sudo apt-get install pytest
+sudo apt-get install fastapi
+sudo apt-get install uvicorn
+sudo apt-get install tesseract-ocr
 
 ## Install Ollama (Local LLM Runtime)
 Ollama runs the language model locally and exposes it over HTTP.
 
 Download and install from:
-
 https://ollama.com
-
 Verify installation:
-
 ollama --version
 
-
-## Download a Model
-Run once to download a model (example): ollama pull llama3.2
-
+## Download a ModelRun once to download a model (example): ollama pull llama3.2
 The model is stored locally.
 
 Note: On most systems you do **not** need to run `ollama serve` explicitly.  
