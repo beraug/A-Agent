@@ -9,3 +9,12 @@ openai>=1.0.0
 
 # For running tests
 pytest>=7.0.0
+
+# For HTML and consuming files
+fastapi
+uvicorn
+pydantic
+pillow
+pytesseract
+pymupdf
+python-docx

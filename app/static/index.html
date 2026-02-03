@@ -1,92 +1,622 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Agentic AI Playground</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 40px auto;
+    :root{
+      --bg:#0b1020;
+      --panel:#0f1733;
+      --panel2:#0c132b;
+      --text:#e8eeff;
+      --muted:#a7b4e6;
+      --border:rgba(255,255,255,.12);
+      --accent:#7aa2ff;
+      --accent2:#9d7aff;
+      --danger:#ff6b6b;
+      --ok:#2ee59d;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius:16px;
     }
-    #chat {
-      border: 1px solid #ccc;
-      padding: 10px;
-      height: 400px;
-      overflow-y: auto;
-      margin-bottom: 10px;
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(122,162,255,.35), transparent 55%),
+                  radial-gradient(1200px 600px at 80% -10%, rgba(157,122,255,.25), transparent 55%),
+                  var(--bg);
+      color:var(--text);
     }
-    .user {
-      font-weight: bold;
-      margin-top: 10px;
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+      padding:24px;
+      display:grid;
+      gap:18px;
     }
-    .agent {
-      margin-left: 10px;
+    header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      padding:18px;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      box-shadow: var(--shadow);
     }
-    input {
-      width: 80%;
-      padding: 8px;
+    .brand{
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
     }
-    button {
-      padding: 8px 12px;
+    .logo{
+      width:44px; height:44px;
+      border-radius:12px;
+      background: linear-gradient(135deg, rgba(122,162,255,.9), rgba(157,122,255,.9));
+      display:grid; place-items:center;
+      flex:0 0 auto;
+      box-shadow: 0 10px 22px rgba(0,0,0,.25);
+    }
+    .logo svg{width:26px;height:26px; opacity:.95}
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .title h1{
+      font-size:18px;
+      margin:0;
+      letter-spacing:.2px;
+    }
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.4;
+      max-width:700px;
+    }
+    .meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:8px;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .pill{
+      border:1px solid var(--border);
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.03);
+    }
+    .right{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:10px;
+      min-width:240px;
+    }
+    .status{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .dot{
+      width:9px;height:9px;border-radius:50%;
+      background: rgba(255,255,255,.25);
+      box-shadow: 0 0 0 4px rgba(255,255,255,.06);
+    }
+    .dot.ok{background:var(--ok); box-shadow: 0 0 0 4px rgba(46,229,157,.14)}
+    .dot.bad{background:var(--danger); box-shadow: 0 0 0 4px rgba(255,107,107,.14)}
+    .btnrow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    button{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:13px;
+    }
+    button:hover{background: rgba(255,255,255,.10)}
+    button.primary{
+      border-color: rgba(122,162,255,.55);
+      background: linear-gradient(135deg, rgba(122,162,255,.22), rgba(157,122,255,.18));
+    }
+    button.primary:hover{background: linear-gradient(135deg, rgba(122,162,255,.28), rgba(157,122,255,.22))}
+    button.ghost{background: transparent}
+    button.danger{border-color: rgba(255,107,107,.45)}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:18px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns: 1fr}
+      .right{align-items:flex-start; min-width:auto}
+    }
+    .card{
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card h2{
+      margin:0;
+      padding:14px 14px 0 14px;
+      font-size:14px;
+      color:var(--muted);
+      font-weight:700;
+      letter-spacing:.3px;
+    }
+    .chat{
+      display:flex;
+      flex-direction:column;
+      height:560px;
+    }
+    .log{
+      flex:1;
+      overflow:auto;
+      padding:14px;
+      background: rgba(0,0,0,.12);
+      border-top:1px solid var(--border);
+      border-bottom:1px solid var(--border);
+    }
+    .msg{
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      margin:8px 0;
+      max-width: 92%;
+      line-height:1.35;
+      white-space:pre-wrap;
+      word-wrap:break-word;
+    }
+    .msg.user{
+      background: rgba(122,162,255,.10);
+      border-color: rgba(122,162,255,.22);
+      margin-left:auto;
+    }
+    .msg.agent{
+      background: rgba(255,255,255,.04);
+      border-color: rgba(255,255,255,.10);
+      margin-right:auto;
+    }
+    .msg.sys{
+      background: rgba(255,255,255,.02);
+      border-style:dashed;
+      color:var(--muted);
+      max-width: 100%;
+    }
+    .composer{
+      padding:14px;
+      display:grid;
+      gap:10px;
+    }
+    textarea{
+      width:100%;
+      min-height:54px;
+      max-height:140px;
+      resize:vertical;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.22);
+      color:var(--text);
+      outline:none;
+      font-size:14px;
+      line-height:1.4;
+    }
+    textarea:focus{border-color: rgba(122,162,255,.55)}
+    .row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .row .leftrow{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .hint{color:var(--muted); font-size:12px}
+    .side{
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .drop{
+      border:1px dashed rgba(255,255,255,.25);
+      border-radius:14px;
+      padding:14px;
+      background: rgba(0,0,0,.18);
+      transition: .15s ease;
+    }
+    .drop.dragover{
+      border-color: rgba(122,162,255,.65);
+      background: rgba(122,162,255,.10);
+    }
+    .drop .small{color:var(--muted); font-size:12px; margin-top:6px}
+    .filelist{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:10px;
+    }
+    .fileitem{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:13px;
+      color:var(--text);
+    }
+    .filemeta{color:var(--muted); font-size:12px}
+    .thumb{
+      width:100%;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      overflow:hidden;
+      background: rgba(0,0,0,.20);
+      display:none;
+    }
+    .thumb img{
+      width:100%;
+      height:auto;
+      display:block;
+    }
+    .toggle{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .toggle input{transform: translateY(1px);}
+    code.kbd{
+      border:1px solid rgba(255,255,255,.18);
+      padding:2px 6px;
+      border-radius:8px;
+      background: rgba(0,0,0,.20);
+      color:var(--text);
+      font-size:12px;
     }
   </style>
 </head>
+
 <body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true" title="Agentic AI Playground">
+          <!-- Simple "spark" logo (inline SVG, no assets needed) -->
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 2l1.2 5.6L19 9l-5.8 1.4L12 16l-1.2-5.6L5 9l5.8-1.4L12 2z" stroke="white" stroke-width="1.6" opacity="0.95"/>
+            <path d="M6 16l.8 3.8L11 21l-4.2 1.2L6 26" stroke="white" stroke-width="0" opacity="0"/>
+          </svg>
+        </div>
 
-  <h2>Agentic AI Playground</h2>
+        <div class="title">
+          <h1>Agentic AI Playground</h1>
+          <p class="subtitle">
+            Offline generative agent with <b>Memory</b>, <b>Reflection</b>, and <b>Planning</b>, running locally via Ollama.
+            Built as a practical implementation of the “Generative Agents” architecture.
+          </p>
+          <div class="meta">
+            <!-- Edit these 3 values once -->
+            <span class="pill">Owner: <span id="owner">beraug</span></span>
+            <span class="pill">Repo: <span id="repo">A-Agent</span></span>
+            <span class="pill"><a id="repoLink" href="https://github.com/beraug/A-Agent" target="_blank" rel="noreferrer">GitHub</a></span>
+          </div>
+        </div>
+      </div>
 
-  <div id="chat"></div>
+      <div class="right">
+        <div class="status">
+          <span id="healthDot" class="dot"></span>
+          <span id="healthText">Checking backend…</span>
+        </div>
+        <div class="btnrow">
+          <button class="ghost" id="btnHistory" title="Fetch recent memory records">Load History</button>
+          <button class="ghost danger" id="btnClear" title="Clear the chat UI (does not delete memory)">Clear UI</button>
+          <button class="primary" id="btnSend">Send</button>
+        </div>
+      </div>
+    </header>
 
-  <input id="message" type="text" placeholder="Type a message..." />
-  <button onclick="sendMessage()">Send</button>
+    <div class="grid">
+      <!-- Chat card -->
+      <section class="card chat">
+        <h2>Chat</h2>
+        <div id="log" class="log" aria-live="polite"></div>
+
+        <div class="composer">
+          <textarea id="message" placeholder="Type a message… (Shift+Enter for newline)"></textarea>
+
+          <div class="row">
+            <div class="leftrow">
+              <span class="toggle">
+                <input id="includeHistory" type="checkbox" checked />
+                <label for="includeHistory">Include recent history in system prompt (UI-only)</label>
+              </span>
+              <span class="hint">Press <code class="kbd">Enter</code> to send, <code class="kbd">Shift+Enter</code> newline</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Side panel (uploads + helpers) -->
+      <aside class="card">
+        <h2>Uploads</h2>
+        <div class="side">
+          <div id="dropzone" class="drop">
+            <div style="font-weight:700;">Drop files here</div>
+            <div class="small">Images (png/jpg/webp) and text files are best. Multiple files supported.</div>
+
+            <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+              <input id="fileInput" type="file" multiple />
+              <button id="btnRemoveFiles" class="ghost" type="button">Remove all</button>
+            </div>
+
+            <div id="thumb" class="thumb" style="margin-top:10px;">
+              <img id="thumbImg" alt="preview" />
+            </div>
+
+            <div id="fileList" class="filelist"></div>
+          </div>
+
+          <div class="hint">
+            <b>How uploads work:</b> When you attach files, the UI sends them to <code class="kbd">POST /chat-file</code>
+            as <code class="kbd">multipart/form-data</code>. Text-only messages still use <code class="kbd">POST /chat</code>.
+          </div>
+
+          <div class="hint">
+            Tip: For images to be “understood”, your backend must convert them to text (e.g., OCR) or use a vision-capable model.
+            For text files, the backend can read the content and include it in the prompt.
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
 
   <script>
-    const chatDiv = document.getElementById("chat");
-    const input = document.getElementById("message");
+    // ---- Config (edit if you rename endpoints) ----
+    const CHAT_JSON_ENDPOINT = "/chat";       // expects JSON: {message:"..."}
+    const CHAT_FILE_ENDPOINT = "/chat-file";  // expects multipart: message + files[]
+    const HISTORY_ENDPOINT   = "/history?n=30";
+    const HEALTH_ENDPOINT    = "/health";
 
-    function addMessage(role, text) {
+    // ---- DOM ----
+    const logEl = document.getElementById("log");
+    const msgEl = document.getElementById("message");
+    const btnSend = document.getElementById("btnSend");
+    const btnClear = document.getElementById("btnClear");
+    const btnHistory = document.getElementById("btnHistory");
+    const healthDot = document.getElementById("healthDot");
+    const healthText = document.getElementById("healthText");
+    const includeHistory = document.getElementById("includeHistory");
+
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("fileInput");
+    const fileList = document.getElementById("fileList");
+    const btnRemoveFiles = document.getElementById("btnRemoveFiles");
+    const thumb = document.getElementById("thumb");
+    const thumbImg = document.getElementById("thumbImg");
+
+    let selectedFiles = [];
+
+    // ---- UI helpers ----
+    function addMsg(kind, text) {
       const div = document.createElement("div");
-      div.className = role;
-      div.textContent = `${role === "user" ? "You" : "Agent"}: ${text}`;
-      chatDiv.appendChild(div);
-      chatDiv.scrollTop = chatDiv.scrollHeight;
+      div.className = `msg ${kind}`;
+      div.textContent = text;
+      logEl.appendChild(div);
+      logEl.scrollTop = logEl.scrollHeight;
     }
 
-    async function sendMessage() {
-      const message = input.value.trim();
-      if (!message) return;
+    function fmtBytes(bytes) {
+      const units = ["B","KB","MB","GB"];
+      let i = 0, b = bytes;
+      while (b >= 1024 && i < units.length - 1) { b /= 1024; i++; }
+      return `${b.toFixed(b >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+    }
 
-      addMessage("user", message);
-      input.value = "";
+    function renderFileList() {
+      fileList.innerHTML = "";
+      thumb.style.display = "none";
+      thumbImg.src = "";
 
-      try {
-        const response = await fetch("/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message })
-        });
-
-        if (!response.ok) {
-          throw new Error("Server error");
-        }
-
-        const data = await response.json();
-        addMessage("agent", data.reply);
-
-      } catch (err) {
-        addMessage("agent", "Error: agent unavailable (is the server running?)");
+      if (selectedFiles.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "hint";
+        empty.textContent = "No files selected.";
+        fileList.appendChild(empty);
+        return;
       }
+
+      // show first image preview if present
+      const firstImg = selectedFiles.find(f => f.type.startsWith("image/"));
+      if (firstImg) {
+        const url = URL.createObjectURL(firstImg);
+        thumbImg.src = url;
+        thumb.style.display = "block";
+      }
+
+      selectedFiles.forEach((f, idx) => {
+        const row = document.createElement("div");
+        row.className = "fileitem";
+
+        const left = document.createElement("div");
+        left.innerHTML = `<div><b>${escapeHtml(f.name)}</b></div><div class="filemeta">${escapeHtml(f.type || "unknown")} · ${fmtBytes(f.size)}</div>`;
+
+        const right = document.createElement("button");
+        right.className = "ghost";
+        right.type = "button";
+        right.textContent = "Remove";
+        right.onclick = () => {
+          selectedFiles.splice(idx, 1);
+          renderFileList();
+        };
+
+        row.appendChild(left);
+        row.appendChild(right);
+        fileList.appendChild(row);
+      });
     }
 
-    // Allow Enter key to send
-    input.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
-        sendMessage();
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    // ---- Drag & drop ----
+    dropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropzone.classList.add("dragover");
+    });
+    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("dragover");
+      const files = Array.from(e.dataTransfer.files || []);
+      if (files.length) {
+        selectedFiles.push(...files);
+        renderFileList();
       }
     });
-  </script>
 
+    fileInput.addEventListener("change", () => {
+      const files = Array.from(fileInput.files || []);
+      if (files.length) {
+        selectedFiles.push(...files);
+        fileInput.value = "";
+        renderFileList();
+      }
+    });
+
+    btnRemoveFiles.addEventListener("click", () => {
+      selectedFiles = [];
+      renderFileList();
+    });
+
+    btnClear.addEventListener("click", () => {
+      logEl.innerHTML = "";
+      addMsg("sys", "UI cleared (memory not deleted).");
+    });
+
+    btnHistory.addEventListener("click", async () => {
+      try {
+        const res = await fetch(HISTORY_ENDPOINT);
+        const data = await res.json();
+        addMsg("sys", "Recent history loaded. (Check console for raw data)");
+        console.log("history:", data);
+      } catch {
+        addMsg("sys", "Could not load history.");
+      }
+    });
+
+    // ---- Health check ----
+    async function checkHealth() {
+      try {
+        const res = await fetch(HEALTH_ENDPOINT, { method: "GET" });
+        if (!res.ok) throw new Error("bad");
+        const data = await res.json();
+        healthDot.className = "dot ok";
+        healthText.textContent = `Backend OK · model: ${data.model ?? "unknown"}`;
+      } catch {
+        healthDot.className = "dot bad";
+        healthText.textContent = "Backend unavailable";
+      }
+    }
+
+    // ---- Sending messages ----
+    async function send() {
+      const message = msgEl.value.trim();
+      if (!message && selectedFiles.length === 0) return;
+
+      addMsg("user", message || "(sent files)");
+      msgEl.value = "";
+
+      // Optional: prepend recent history into the message (UI-only)
+      // This is not required if your backend already retrieves memory internally.
+      // Kept here as a toggle for experimentation.
+      let finalMessage = message;
+      if (includeHistory.checked) {
+        try {
+          const r = await fetch(HISTORY_ENDPOINT);
+          if (r.ok) {
+            const hist = await r.json();
+            // keep it short
+            const lines = (hist || []).slice(-10).map(x => `- ${x.type}: ${x.content}`).join("\n");
+            if (lines.trim()) {
+              finalMessage = `Context (recent history):\n${lines}\n\nUser: ${message}`;
+            }
+          }
+        } catch {}
+      }
+
+      try {
+        let replyText = "";
+
+        if (selectedFiles.length > 0) {
+          // multipart/form-data => /chat-file
+          const form = new FormData();
+          form.append("message", finalMessage);
+          selectedFiles.forEach(f => form.append("files", f, f.name));
+
+          const res = await fetch(CHAT_FILE_ENDPOINT, { method: "POST", body: form });
+          if (!res.ok) throw new Error("Server error");
+          const data = await res.json();
+          replyText = data.reply ?? JSON.stringify(data);
+
+          // keep files selected unless user removes them
+        } else {
+          // JSON => /chat
+          const res = await fetch(CHAT_JSON_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: finalMessage })
+          });
+          if (!res.ok) throw new Error("Server error");
+          const data = await res.json();
+          replyText = data.reply ?? JSON.stringify(data);
+        }
+
+        addMsg("agent", replyText);
+      } catch (e) {
+        addMsg("agent", "Error: agent unavailable (is the server running?)");
+      }
+    }
+
+    btnSend.addEventListener("click", send);
+
+    msgEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        send();
+      }
+    });
+
+    // ---- Init ----
+    renderFileList();
+    addMsg("sys", "Ready. Tip: attach files to send them to /chat-file (multipart).");
+    checkHealth();
+    setInterval(checkHealth, 8000);
+  </script>
 </body>
 </html>
-
