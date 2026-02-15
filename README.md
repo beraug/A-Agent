@@ -159,13 +159,6 @@ This project is designed to demonstrate:
 - How to expose an AI agent via a web API
 - How to build an offline-first AI application
 
-## Project Status
-- Architecture: Frozen
-- Phases 0–7: Complete
-- Focus: Clarity, learning, correctness
-
-See `docs/ARCHITECTURE_FROZEN.md` for details.
-
 ## License
 See the LICENSE file.
 
