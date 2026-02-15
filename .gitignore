@@ -16,3 +16,8 @@ data/*.db
 # OS junk
 .DS_Store
 
+# Planning docs
+docs/ARCHITECTURE_FROZEN.md
+docs/COURSE_PLAN.md
+
+
