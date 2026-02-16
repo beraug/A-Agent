@@ -12,6 +12,10 @@ This project also serves as a **research exploration into agent cognition under 
 
 No cloud APIs. No API keys. Fully reproducible.
 
+## Interface Preview
+
+![Agentic AI Playground UI](images/ui.png)
+
 ## Academic Credit
 This work is inspired by:
 
