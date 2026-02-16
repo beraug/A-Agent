@@ -9,6 +9,8 @@ The project demonstrates how to build an **agentic AI system** with:
 
 The agent is exposed through a **FastAPI backend** and a **simple web frontend**, running entirely **locally** using **Ollama**.
 
+This project also serves as a **research exploration into agent cognition under constrained, safety-aligned**, and offline execution environments.
+
 No cloud APIs. No API keys. Fully reproducible.
 
 ## Academic Credit
@@ -61,10 +63,6 @@ User message
 │       └── index.html
 ├── data/
 │   └── memory.db            # auto-created at runtime (gitignored)
-├── docs/
-│   ├── ARCHITECTURE_FROZEN.md
-│   ├── COURSE_PLAN.md
-│   └── PAPER_SUMMARY.md
 ├── src/
 │   ├── agent.py
 │   ├── hello_agent.py
@@ -84,7 +82,7 @@ User message
 
 ### System
 - Python 3.10+
-- Linux,Ubuntu
+- Linux - Ubuntu 22.04.5 LTS
 - Internet required only once to download the model
 
 ### Python Dependencies
@@ -100,9 +98,10 @@ https://ollama.com
 Verify installation:
 ollama --version
 
-## Download a ModelRun once to download a model (example): 
+## Download a Model
 
-ollama pull llama3.2 
+Run once to download a model (example): ollama pull llama3.2 
+
 ## >> The model is stored locally.
 
 Note: On most systems you do **not** need to run `ollama serve` explicitly.  
