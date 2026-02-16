@@ -14,7 +14,7 @@ No cloud APIs. No API keys. Fully reproducible.
 
 ## Interface Preview
 
-![Agentic AI Playground UI](images/A-Agent_UI.png)
+![Agentic AI Playground UI](docs/images/A-Agent_UI.png)
 
 ## Academic Credit
 This work is inspired by:
