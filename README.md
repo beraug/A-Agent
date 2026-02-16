@@ -1,7 +1,6 @@
 # Agentic AI Playground (Offline Generative Agents)
-This repository contains a **complete, offline-first implementation of a Generative Agent** inspired by the paper:
+This repository contains a **complete, offline-first implementation of a Generative Agent** inspired by the paper: **“Generative Agents: Interactive Simulacra of Human Behavior” (Park et al., UIST 2023)**
 
-**“Generative Agents: Interactive Simulacra of Human Behavior” (Park et al., UIST 2023)**
 The project demonstrates how to build an **agentic AI system** with:
 - Memory
 - Reflection
